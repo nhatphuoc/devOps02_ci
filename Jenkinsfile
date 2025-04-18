@@ -10,7 +10,7 @@ pipeline {
         // Full list of services
         ALL_SERVICES = "spring-petclinic-admin-server spring-petclinic-api-gateway spring-petclinic-config-server spring-petclinic-customers-service spring-petclinic-discovery-server spring-petclinic-genai-service spring-petclinic-vets-service spring-petclinic-visits-service"
         // Docker Hub credentials
-        DOCKER_HUB_CREDS = credentials('docker-hub-credentials')
+        DOCKER_HUB_CREDS = credentials('devOps_project02')
     }
     stages {
         stage('Detect Branch and Changes') {
