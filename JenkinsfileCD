@@ -64,7 +64,7 @@ pipeline {
                 script {
                     commitIDs.each { service, commitID ->
                         echo "Updating Helm for ${service} with commit ID ${commitID}"
-                        updateHelm("nhatphuoc", service, commitID) // Thay bằng tên tài khoản Docker Hub của bạn
+                        updateHelm("yourdockerhubusername", service, commitID) // Thay bằng tên tài khoản Docker Hub của bạn
                     }
                 }
             }
@@ -108,6 +108,11 @@ def updateHelm(String docker_user, String service, String commitID) {
 
     echo "Using GitOps repo: ${gitOpsRepo}"
 
+    // Kiểm tra gitOpsRepo không rỗng
+    if (!gitOpsRepo) {
+        error "gitOpsRepo is empty or undefined. Please specify a valid Git repository URL."
+    }
+
     // Use Jenkins credentials
     echo "Cleaning up potential existing GitOps directory: ${gitOpsDir}"
     sh "rm -rf ${gitOpsDir}"
@@ -116,6 +121,11 @@ def updateHelm(String docker_user, String service, String commitID) {
 
     // Use Jenkins credentials
     withCredentials([usernamePassword(credentialsId: 'devOps_project02_cd', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_PASS')]) { // Thay bằng ID credential GitHub của bạn
+        // Kiểm tra biến GIT_USER và GIT_PASS
+        if (!env.GIT_USER || !env.GIT_PASS) {
+            error "Git credentials are not properly set. Check the credential ID in Jenkins."
+        }
+
         // Clear any cached Git credentials
         sh '''
             git config --global --unset credential.helper || true
@@ -124,7 +134,7 @@ def updateHelm(String docker_user, String service, String commitID) {
         '''
         // Clone GitOps repo with credentials
         sh '''
-            git clone ${gitOpsRepo} ${gitOpsDir}
+            git clone https://$GIT_USER:$GIT_PASS@${gitOpsRepo} ${gitOpsDir}
         '''
 
         // Update the image tag in the yaml file
